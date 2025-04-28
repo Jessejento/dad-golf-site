@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { writeClient } from '../lib/sanity'
 
-export default function AlbumUpload() {
+interface AlbumUploadProps {
+    onSuccess?: () => void
+}
+
+export default function AlbumUpload({ onSuccess }: AlbumUploadProps) {
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [date, setDate] = useState('')
@@ -42,6 +46,7 @@ export default function AlbumUpload() {
             setDescription('')
             setDate('')
             setFiles(null)
+            onSuccess?.()
             alert('Album created successfully!')
         } catch (error) {
             console.error('Upload error:', error)
