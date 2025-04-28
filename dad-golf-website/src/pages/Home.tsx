@@ -4,7 +4,7 @@ export default function Home() {
     return (
         <div className="w-full min-h-screen bg-gray-50 px-8 py-16">
             <div className="max-w-4xl mx-auto text-center">
-                <h1 className="text-5xl font-extrabold text-gray-800 mb-12">Welcome to Dad's Golf Site</h1>
+                <h1 className="text-5xl font-extrabold text-gray-800 mb-12">Welcome to Jentoooo Golf</h1>
                 <p className="text-xl text-gray-600 mb-12">
                     Track our golf adventures, view upcoming schedules, and browse through photos of our games.
                 </p>

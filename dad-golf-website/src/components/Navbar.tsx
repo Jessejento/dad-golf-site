@@ -5,8 +5,9 @@ export default function Navbar() {
         <nav className="bg-white shadow-lg">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
-                    <Link to="/" className="text-xl font-bold">
-                        Dad's Golf Site
+                    <Link to="/" className="flex items-center space-x-2">
+                        <img src="/logo.jpg" alt="Jentoooos Golf Logo" className="h-10 w-10 object-contain rounded" />
+                        <span className="text-xl font-bold">Jentoooo Golf</span>
                     </Link>
                     <div className="flex space-x-4">
                         <Link
