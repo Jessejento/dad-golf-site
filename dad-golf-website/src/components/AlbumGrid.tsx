@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { client, writeClient, urlFor } from '../lib/sanity'
 import { Link } from 'react-router-dom'
 
@@ -22,35 +22,33 @@ export default function AlbumGrid() {
     const [loading, setLoading] = useState(true)
     const [deleting, setDeleting] = useState<string | null>(null)
 
-    const fetchAlbums = async () => {
+    const fetchAlbums = useCallback(async () => {
         try {
-            setLoading(true)
             const query = `*[_type == "album"] | order(date desc) {
                 _id,
                 name,
                 description,
                 date,
                 "images": images[] {
-                    "asset": asset->,
+                    asset,
                     caption,
                     alt
                 }
             }`
-            console.log('Fetching albums...')
             const result = await client.fetch(query)
-            console.log('Fetched albums:', result)
             setAlbums(result)
+            setError(null)
         } catch (err) {
             console.error('Error fetching albums:', err)
             setError(err instanceof Error ? err.message : 'Error fetching albums')
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
     useEffect(() => {
         fetchAlbums()
-    }, [])
+    }, [fetchAlbums])
 
     const handleDelete = async (e: React.MouseEvent, albumId: string) => {
         e.preventDefault() // Prevent navigation
@@ -58,22 +56,29 @@ export default function AlbumGrid() {
 
         try {
             setDeleting(albumId)
+            // Optimistic update - remove album from UI immediately
+            setAlbums(prevAlbums => prevAlbums.filter(album => album._id !== albumId))
+
             // Delete the album document
             await writeClient.delete(albumId)
-            // Refresh the albums list
+
+            // Refetch to ensure sync with server
             await fetchAlbums()
         } catch (err) {
             console.error('Error deleting album:', err)
+            // Revert optimistic update on error
+            await fetchAlbums()
             alert('Error deleting album. Please try again.')
         } finally {
             setDeleting(null)
         }
     }
 
-    if (loading) {
+    if (loading && albums.length === 0) {
         return (
-            <div className="text-center py-8 text-gray-500">
-                Loading albums...
+            <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <p className="mt-2 text-gray-500">Loading albums...</p>
             </div>
         )
     }
@@ -82,6 +87,12 @@ export default function AlbumGrid() {
         return (
             <div className="text-center py-8 text-red-500">
                 Error: {error}
+                <button
+                    onClick={() => fetchAlbums()}
+                    className="block mx-auto mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                    Try Again
+                </button>
             </div>
         )
     }
@@ -122,8 +133,11 @@ export default function AlbumGrid() {
                     </Link>
                     <button
                         onClick={(e) => handleDelete(e, album._id)}
-                        disabled={deleting === album._id}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                        disabled={deleting !== null}
+                        className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${deleting === album._id
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-red-500 hover:bg-red-600'
+                            } text-white`}
                     >
                         {deleting === album._id ? (
                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
