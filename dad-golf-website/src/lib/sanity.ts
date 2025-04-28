@@ -2,8 +2,8 @@ import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
 
 export const client = createClient({
-    projectId: '7yfoidms',
-    dataset: 'production',
+    projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+    dataset: import.meta.env.VITE_SANITY_DATASET,
     useCdn: true,
     apiVersion: '2024-03-13',
     token: import.meta.env.VITE_SANITY_TOKEN
@@ -17,8 +17,8 @@ export function urlFor(source: any) {
 
 // For uploading images
 export const writeClient = createClient({
-    projectId: '7yfoidms',
-    dataset: 'production',
+    projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+    dataset: import.meta.env.VITE_SANITY_DATASET,
     useCdn: false,
     apiVersion: '2024-03-13',
     token: import.meta.env.VITE_SANITY_TOKEN
